@@ -126,7 +126,7 @@ public class TelaCadastroProdutos extends JFrame {
         panel.add(btnImportar);
 
         String[] colunas = {
-            "Código", "Descrição", "Marca", "Fornecedor", "Fabricação", "Validade"
+            "Código", "Nome", "Marca", "Fornecedor", "Fabricação", "Validade"
         };
         Object[][] dados = {
             { "", "", "", "", "", "" },
