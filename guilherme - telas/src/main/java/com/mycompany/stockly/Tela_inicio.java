@@ -8,15 +8,154 @@ package com.mycompany.stockly;
  *
  * @author g.magri
  */
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.security.MessageDigest;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
 public class Tela_inicio extends javax.swing.JFrame {
 
     /**
      * Creates new form Tela_inicio
      */
+     private JTextField campoUsuario;
+    private JTextField campoEmpresa;
+    private JPasswordField campoSenha1;
+    private JButton botaoEntrar1;
+    private JLabel labelCadastrar;
+   
+    
+    
     public Tela_inicio() {
-        initComponents();
+        montarInterface();
     }
+        
+        private void montarInterface() {
+        setTitle("Login - Stockly");
+        setSize(650, 450);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(null); // layout absoluto
+        getContentPane().setBackground(new Color(0, 180, 0)); // verde do fundo
 
+        // Painel central branco
+        JPanel painel = new JPanel();
+        painel.setLayout(null);
+        painel.setBackground(Color.WHITE);
+        painel.setBounds(40, 40, 560, 340);
+        add(painel);
+
+        // Título
+        JLabel titulo = new JLabel("Seja Bem-Vindo ao ");
+        titulo.setFont(new Font("Segoe UI", Font.PLAIN, 20));
+        titulo.setBounds(30, 20, 200, 30);
+        painel.add(titulo);
+
+        JLabel stockly = new JLabel("Stockly");
+        stockly.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        stockly.setForeground(new Color(30, 60, 150)); // azul
+        stockly.setBounds(210, 20, 100, 30);
+        painel.add(stockly);
+
+        // Campos
+        JLabel labelUsuario = new JLabel("Usuário");
+        labelUsuario.setBounds(30, 70, 100, 20);
+        painel.add(labelUsuario);
+
+        campoUsuario = new JTextField();
+        campoUsuario.setBounds(30, 90, 200, 25);
+        painel.add(campoUsuario);
+
+        JLabel labelEmpresa = new JLabel("Código Empresa");
+        labelEmpresa.setBounds(30, 120, 150, 20);
+        painel.add(labelEmpresa);
+
+        campoEmpresa = new JTextField();
+        campoEmpresa.setBounds(30, 140, 200, 25);
+        painel.add(campoEmpresa);
+
+        JLabel labelSenha = new JLabel("Senha");
+        labelSenha.setBounds(30, 170, 100, 20);
+        painel.add(labelSenha);
+
+        campoSenha1 = new JPasswordField();
+        campoSenha1.setBounds(30, 190, 200, 25);
+        painel.add(campoSenha1);
+
+        // Botão Entrar
+        botaoEntrar1 = new JButton("Entrar");
+        botaoEntrar1.setBounds(30, 230, 100, 30);
+        botaoEntrar1.setBackground(new Color(40, 70, 160));
+        botaoEntrar1.setForeground(Color.WHITE);
+        painel.add(botaoEntrar1);
+
+        // Ações do botão
+        botaoEntrar1.addActionListener(e -> realizarLogin());
+
+        // Labels clicáveis
+        
+
+        labelCadastrar = new JLabel("<html><a href=''>Deseja cadastrar-se?</a></html>");
+        labelCadastrar.setBounds(250, 220, 180, 20);
+        labelCadastrar.setForeground(Color.BLUE);
+        painel.add(labelCadastrar);
+
+        // Imagem
+        JLabel imagem = new JLabel(new ImageIcon("logo.png")); // Substitua pelo nome real da imagem
+        imagem.setBounds(360, 80, 150, 150);
+        painel.add(imagem);
+
+        setLocationRelativeTo(null);
+        setVisible(true);
+    
+
+    }
+        private void realizarLogin() {
+        
+    String nome_funcionario = campoUsuario.getText();
+    String codigo_empresa = campoEmpresa.getText();
+    String senha = new String(campoSenha1.getPassword());
+
+    if (nome_funcionario.isEmpty() || codigo_empresa.isEmpty() || senha.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Preencha todos os campos.");
+    } else {
+        try {
+            // Conexão com MySQL
+            String url = "jdbc:mysql://localhost:3306/stocklys";
+            String user = "root"; // seu usuário do MySQL
+            String password = ""; // sua senha do MySQL
+
+            Connection conexao = DriverManager.getConnection(url, user, password);
+
+            // Query para verificar usuário
+            String sql = "SELECT * FROM funcionario WHERE nome_funcionario = ? AND codigo_empresa = ? AND senha = ?";
+   
+             PreparedStatement stmt = conexao.prepareStatement(sql);
+            stmt.setString(1, nome_funcionario);
+            stmt.setString(2, codigo_empresa);
+            stmt.setString(3, senha);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                JOptionPane.showMessageDialog(this, "Login realizado com sucesso!");
+                // Aqui você pode abrir a próxima tela, se quiser
+            } else {
+                JOptionPane.showMessageDialog(this, "Usuário, empresa ou senha incorretos.");
+            }
+
+            rs.close();
+            stmt.close();
+            conexao.close();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao conectar ao banco: " + e.getMessage());
+        }
+    }
+}
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

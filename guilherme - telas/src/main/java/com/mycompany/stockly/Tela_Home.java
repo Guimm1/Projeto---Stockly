@@ -3,7 +3,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package com.mycompany.stockly;
-
+import javax.swing.*;
+import java.awt.*;
+import javax.swing.table.DefaultTableModel;
+import java.sql.*;
 /**
  *
  * @author g.magri
@@ -14,8 +17,85 @@ public class Tela_Home extends javax.swing.JFrame {
      * Creates new form Tela_Home
      */
     public Tela_Home() {
-        initComponents();
+        montarInterface();
     }
+private void montarInterface() {
+        setTitle("Vencimento Próximo");
+        setSize(1000, 700);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(null);
+        getContentPane().setBackground(new Color(100, 200, 100)); // Verde
+
+        // Painel principal (cinza claro)
+        JPanel painelBranco = new JPanel();
+        painelBranco.setLayout(null);
+        painelBranco.setBackground(Color.LIGHT_GRAY);
+        painelBranco.setBounds(50, 50, 900, 580);
+        add(painelBranco);
+
+        // Barra de título
+        JPanel barraTitulo = new JPanel();
+        barraTitulo.setBackground(new Color(30, 60, 160)); // Azul
+        barraTitulo.setBounds(0, 0, 900, 40);
+        barraTitulo.setLayout(null);
+        painelBranco.add(barraTitulo);
+
+        JLabel titulo = new JLabel("Vencimento Próximo", SwingConstants.CENTER);
+titulo.setForeground(Color.WHITE);
+titulo.setFont(new Font("Segoe UI", Font.BOLD, 18));
+titulo.setBounds(0, 5, 900, 30); // Largura total da barra
+barraTitulo.add(titulo);
+        // Tabela de dados
+        String[] colunas = {"Código", "Nome", "Marca", "Fornecedor", "Fabricação", "Validade"};
+        DefaultTableModel modeloTabela = new DefaultTableModel(colunas, 0); // 0 = nenhuma linha inicial
+
+        JTable tabela = new JTable(modeloTabela);
+        tabela.setRowHeight(30); // altura das linhas
+        JScrollPane scrollPane = new JScrollPane(tabela);
+        scrollPane.setBounds(20, 60, 860, 480); // área da tabela com rolagem
+
+        painelBranco.add(scrollPane);
+        
+        try {
+    String url = "jdbc:mysql://localhost:3306/stocklys";
+    String usuario = "root";
+    String senha = "";
+
+    Connection conexao = DriverManager.getConnection(url, usuario, senha);
+
+    // JOIN correto com tabela intermediária produto_fornecedor
+    String sql = 
+        "SELECT p.id_produto, p.nome, p.marca, f.nome AS fornecedor, " +
+        "       p.fabricacao, p.validade " +
+        "FROM produto p " +
+        "JOIN produto_fornecedor pf ON p.id_produto = pf.id_produto " +
+        "JOIN fornecedor f ON pf.id_fornecedor = f.id_fornecedor";
+
+    PreparedStatement stmt = conexao.prepareStatement(sql);
+    ResultSet rs = stmt.executeQuery();
+
+    while (rs.next()) {
+        Object[] linha = {
+            rs.getString("id_produto"),
+            rs.getString("nome"),
+            rs.getString("marca"),
+            rs.getString("fornecedor"),
+            rs.getDate("fabricacao"),
+            rs.getDate("validade")
+        };
+        modeloTabela.addRow(linha);
+    }
+
+    rs.close();
+    stmt.close();
+    conexao.close();
+
+} catch (SQLException e) {
+    e.printStackTrace();
+    JOptionPane.showMessageDialog(this, "Erro ao carregar dados do banco: " + e.getMessage());
+}
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
